@@ -1,0 +1,139 @@
+INCLUDE 'EMU8086.INC'
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+NUM1 DB 0
+NUM2 DB 0
+CHOOSE1 DB 0
+CHOOSE2 DB 0
+ARR DB 10 DUP(?)
+
+.CODE
+	MAIN PROC
+	
+	MOV AX,@DATA
+	MOV DS,AX
+	
+	PRINT "                             ASSEMBLY LANGUAGE PROJECT               "  
+	PRINTN
+    PRINTN  
+    
+    PRINT "1. CALCULATOR "
+    PRINTN
+    PRINT "2. REVERSE "
+    PRINTN
+    PRINT "ENTER THE NUMBER OF THE OPTION YOU WANT TO CHOOSE: "    
+    
+    MOV AH,1
+    INT 21H
+    MOV CHOOSE2, AL
+    
+    CMP CHOOSE2, '1'
+    JE CALCULATOR
+    
+    CMP CHOOSE2, '2'
+    JE REVERSE
+    JMP DONE
+    
+    CALCULATOR:
+    PRINTN
+	PRINT "  ENTER FIRST NUMBER (0-9): "
+	MOV AH, 1
+	INT 21H
+	SUB AL, '0'    ; Convert ASCII to numeric value
+	MOV NUM1, AL
+	
+	PRINTN
+	
+	PRINT "  ENTER SECOND NUMBER (0-9): "
+	MOV AH, 1
+	INT 21H
+	SUB AL, '0'    ; Convert ASCII to numeric value
+	MOV NUM2, AL
+
+	PRINTN
+	
+	PRINT " CHOOSE OPERATION: " 
+    PRINTN
+    PRINT " 1. ADDITION "
+    PRINTN
+    PRINT " 2. SUBTRACTION "
+    PRINTN
+	MOV AH, 1
+	INT 21H
+	MOV CHOOSE1, AL
+
+	CMP CHOOSE1, '1'
+	JE ADDITION 
+	
+	CMP CHOOSE1, '2'
+	JE SUBTRACTION
+	JMP DONE
+    
+	ADDITION:
+		PRINTN
+		PRINT "SUM IS: "
+		MOV AL, NUM1
+		ADD AL, NUM2
+		ADD AL, '0'  ; Convert numeric to ASCII before printing
+		MOV AH, 2
+		MOV DL, AL
+		INT 21H
+		JMP DONE
+    
+	SUBTRACTION:
+		PRINTN
+		PRINT "SUBTRACTION IS: "
+		MOV AL, NUM1
+		SUB AL, NUM2
+		JC NEGATIVE   ; Check for negative result
+		
+		ADD AL, '0'  ; Convert numeric to ASCII before printing
+		MOV AH, 2
+		MOV DL, AL
+		INT 21H
+		JMP DONE
+
+    NEGATIVE:
+        PRINT "-"
+        NEG AL
+        ADD AL, '0'
+        MOV DL, AL
+        INT 21H
+		JMP DONE
+	
+	REVERSE:
+		MOV SI, OFFSET ARR
+		MOV CX, 10
+    
+	ARRAY_INPUT:
+		PRINTN
+		PRINT "ENTER ARR VALUE (0-9): "
+		MOV AH, 1
+		INT 21H
+		SUB AL, '0'   ; Convert ASCII to numeric value
+		MOV [SI], AL
+		INC SI
+		LOOP ARRAY_INPUT
+        
+	DEC SI
+	MOV CX, 10
+	PRINTN
+	PRINT "REVERSED ARRAY: "
+	PRINTN
+	ARRAY_OUTPUT:
+		MOV AL, [SI]
+		ADD AL, '0'   ; Convert numeric to ASCII before printing
+		MOV DL, AL
+		MOV AH, 2
+		INT 21H
+		PRINT ', '
+		DEC SI
+		LOOP ARRAY_OUTPUT
+	
+	DONE:
+		MOV AH, 4CH
+		INT 21H
+	MAIN ENDP
+END MAIN
